@@ -1,23 +1,41 @@
-import { Star, ShoppingCart, Heart } from "lucide-react";
+import { Star, ShoppingCart, Heart, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Product } from "@/types/product";
 import { useCart } from "@/hooks/useCart";
+import { useWishlist } from "@/hooks/useWishlist";
 import { toast } from "sonner";
 
 interface ProductCardProps {
   product: Product;
   onProductClick?: (product: Product) => void;
+  onQuickView?: (product: Product) => void;
 }
 
-export const ProductCard = ({ product, onProductClick }: ProductCardProps) => {
+export const ProductCard = ({ product, onProductClick, onQuickView }: ProductCardProps) => {
   const { addToCart } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
     addToCart(product);
     toast.success(`${product.name} added to cart!`);
+  };
+
+  const handleWishlistToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleWishlist(product);
+    toast.success(
+      isInWishlist(product.id) 
+        ? `${product.name} removed from wishlist!`
+        : `${product.name} added to wishlist!`
+    );
+  };
+
+  const handleQuickView = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onQuickView?.(product);
   };
 
   const handleCardClick = () => {
@@ -44,14 +62,24 @@ export const ProductCard = ({ product, onProductClick }: ProductCardProps) => {
             -{discountPercentage}%
           </Badge>
         )}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute top-2 right-2 bg-background/80 hover:bg-background"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <Heart className="h-4 w-4" />
-        </Button>
+        <div className="absolute top-2 right-2 flex gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="bg-background/80 hover:bg-background"
+            onClick={handleWishlistToggle}
+          >
+            <Heart className={`h-4 w-4 ${isInWishlist(product.id) ? 'fill-red-500 text-red-500' : ''}`} />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="bg-background/80 hover:bg-background"
+            onClick={handleQuickView}
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
+        </div>
         {!product.inStock && (
           <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
             <Badge variant="destructive">Out of Stock</Badge>

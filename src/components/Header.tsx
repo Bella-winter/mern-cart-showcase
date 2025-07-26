@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { ShoppingCart, Search, Menu, User, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
   Sheet,
@@ -11,20 +10,23 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useCart } from "@/hooks/useCart";
+import { useWishlist } from "@/hooks/useWishlist";
 import { CartDrawer } from "@/components/CartDrawer";
+import { SearchAutocomplete } from "@/components/SearchAutocomplete";
+import { Product } from "@/types/product";
 
 interface HeaderProps {
+  products?: Product[];
   onSearch?: (query: string) => void;
 }
 
-export const Header = ({ onSearch }: HeaderProps) => {
-  const [searchQuery, setSearchQuery] = useState("");
+export const Header = ({ products = [], onSearch }: HeaderProps) => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const { cart } = useCart();
+  const { wishlistCount } = useWishlist();
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSearch?.(searchQuery);
+  const handleSearch = (query: string) => {
+    onSearch?.(query);
   };
 
   return (
@@ -66,18 +68,13 @@ export const Header = ({ onSearch }: HeaderProps) => {
           </div>
 
           {/* Search Bar */}
-          <form onSubmit={handleSearchSubmit} className="hidden md:flex flex-1 max-w-lg mx-8">
-            <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                type="search"
-                placeholder="Search products..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 w-full"
-              />
-            </div>
-          </form>
+          <div className="hidden md:flex flex-1 max-w-lg mx-8">
+            <SearchAutocomplete
+              products={products}
+              onSearch={handleSearch}
+              placeholder="Search products..."
+            />
+          </div>
 
           {/* Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
@@ -98,8 +95,16 @@ export const Header = ({ onSearch }: HeaderProps) => {
               <Search className="h-5 w-5" />
             </Button>
             
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" className="relative">
               <Heart className="h-5 w-5" />
+              {wishlistCount > 0 && (
+                <Badge
+                  variant="destructive"
+                  className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+                >
+                  {wishlistCount}
+                </Badge>
+              )}
             </Button>
             
             <Button variant="ghost" size="icon">

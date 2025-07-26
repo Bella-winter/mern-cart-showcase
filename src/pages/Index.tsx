@@ -2,12 +2,17 @@ import { useState, useRef } from "react";
 import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
 import { ProductGrid } from "@/components/ProductGrid";
+import { ProductQuickView } from "@/components/ProductQuickView";
 import { sampleProducts } from "@/data/products";
+import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { Product } from "@/types/product";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const productsRef = useRef<HTMLDivElement>(null);
+  const { addToRecentlyViewed } = useRecentlyViewed();
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -20,13 +25,19 @@ const Index = () => {
   };
 
   const handleProductClick = (product: Product) => {
+    addToRecentlyViewed(product);
     // TODO: Navigate to product detail page
     console.log("Product clicked:", product);
   };
 
+  const handleQuickView = (product: Product) => {
+    setQuickViewProduct(product);
+    setIsQuickViewOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-surface">
-      <Header onSearch={handleSearch} />
+      <Header products={sampleProducts} onSearch={handleSearch} />
       
       <main>
         <Hero onShopNow={handleShopNow} />
@@ -46,6 +57,7 @@ const Index = () => {
               products={sampleProducts}
               searchQuery={searchQuery}
               onProductClick={handleProductClick}
+              onQuickView={handleQuickView}
             />
           </div>
         </section>
@@ -56,10 +68,17 @@ const Index = () => {
           <div className="text-center text-muted-foreground">
             <p>&copy; 2024 ShopHub. Built with modern e-commerce technologies.</p>
           </div>
-        </div>
-      </footer>
-    </div>
-  );
-};
+          </div>
+        </footer>
+
+        {/* Quick View Modal */}
+        <ProductQuickView
+          product={quickViewProduct}
+          open={isQuickViewOpen}
+          onOpenChange={setIsQuickViewOpen}
+        />
+      </div>
+    );
+  };
 
 export default Index;

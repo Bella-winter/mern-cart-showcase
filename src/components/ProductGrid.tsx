@@ -10,9 +10,10 @@ interface ProductGridProps {
   products: Product[];
   searchQuery?: string;
   onProductClick?: (product: Product) => void;
+  onQuickView?: (product: Product) => void;
 }
 
-export const ProductGrid = ({ products, searchQuery = "", onProductClick }: ProductGridProps) => {
+export const ProductGrid = ({ products, searchQuery = "", onProductClick, onQuickView }: ProductGridProps) => {
   const [sortBy, setSortBy] = useState("name");
   const [filterCategory, setFilterCategory] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -133,6 +134,7 @@ export const ProductGrid = ({ products, searchQuery = "", onProductClick }: Prod
               key={product.id}
               product={product}
               onProductClick={onProductClick}
+              onQuickView={onQuickView}
             />
           ))}
         </div>
